@@ -2,14 +2,39 @@
   "manifest_version": 3,
   "name": "Bookmark Search",
   "version": "1.0",
+  "background": {
+    "service_worker": "background.js"
+  },
   "description": "Search bookmarks using input text.",
   "action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html",
     "default_title": "Bookmark Search"
   },
-  "permissions": ["bookmarks"],
+  "permissions": ["bookmarks", "payment"],
   "icons": {
     "48": "icon.png"
+  },
+  "in_app_payments": {
+    "managed": {
+      "api_key": "AIzaSyCbu55jU82WMK6OpmYFJCKfRjUMlKUoO00",
+      "payments": [
+        {
+          "product_id": "remove_ads",
+          "locales": {
+            "default": {
+              "name": "広告の削除",
+              "description": "Pay once to remove all ads"
+            }
+          },
+          "prices": [
+            {
+              "currency": "JPY",
+              "value": "500"
+            }
+          ]
+        }
+      ]
+    }
   }
 }
