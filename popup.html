@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://js.stripe.com/v3/"></script>
+    <!-- <script src="https://js.stripe.com/v3/"></script> -->
     <meta charset="utf-8" />
     <style>
       body {
@@ -41,7 +41,7 @@
   </head>
   <body>
     <p>検索キーワードを入力</p>
-    <input type="text" id="searchInput" placeholder="Search bookmarks..." />
+    <input type="text" id="searchInput" placeholder="ブックマークを検索します..." />
     <ul id="results"></ul>
     <script src="popup.js" async></script>
     <div>
@@ -52,7 +52,6 @@
         marginwidth="0"
         style="border: none"
         frameborder="0"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"
       ></iframe>
       <button id="removeAdsButton">広告を削除（有料:500円）</button>
     </div>

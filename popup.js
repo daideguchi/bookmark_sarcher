@@ -1,3 +1,17 @@
+// Load Stripe.js dynamically
+function loadScript(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+loadScript("https://js.stripe.com/v3/").then(() => {
+  // The rest of your popup.js code
+});
+
 window.onload = function () {
   const searchInput = document.getElementById("searchInput");
   const results = document.getElementById("results");
@@ -40,54 +54,36 @@ window.onload = function () {
   });
 };
 
-async function makePayment(amount) {
-  try {
-    const response = await fetch("http://localhost:3000/payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount }),
-    });
-
-    const data = await response.json();
-    // data.clientSecretを使ってクライアント側で支払い処理を行う
-  } catch (error) {
-    console.error("Error making payment:", error);
-  }
-}
-
-  // Stripeの公開可能キーを設定
-const stripePublicKey =
-  "pk_live_51Mo2VrGZVxg74KhWbPN6Dnc4OstVBhdYy0IELaNjzLQlYvbkJJe6J3eHIlVmd8IMhkkp1IebOtXSM3AX18bVpCHg00p3Ope8ae";
-
-// Stripeのインスタンスを作成
-const stripe = Stripe(stripePublicKey);
-
 // 広告削除ボタンのクリックイベント
-document.getElementById("removeAdsButton").addEventListener("click", async function () {
-  // Stripe CheckoutセッションIDをサーバーから取得
-  const sessionId = await fetchYourCheckoutSessionId();
-  
-  if (sessionId) {
-    // Stripe Checkout画面にリダイレクト
-    stripe.redirectToCheckout({ sessionId: sessionId });
-  } else {
-    alert("決済処理に失敗しました。もう一度やり直してください。");
-  }
-});
-
-// サーバーからStripe CheckoutセッションIDを取得する関数
-async function fetchYourCheckoutSessionId() {
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage({ method: "createCheckoutSession" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      } else {
-        resolve(response.sessionId);
+document
+  .getElementById("removeAdsButton")
+  .addEventListener("click", async function () {
+    chrome.runtime.sendMessage({ action: "redirectToCheckout" }, (response) => {
+      if (!response.success) {
+        console.error("Error redirecting to checkout");
       }
     });
   });
+
+// サーバーからStripe CheckoutセッションIDを取得する関数
+async function fetchYourCheckoutSessionId() {
+  try {
+    const response = await fetch(
+      "http://localhost:3000/create-checkout-session",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      }
+    );
+
+    const data = await response.json();
+    return data.id; // セッションIDを返すように修正
+  } catch (error) {
+    console.error("Error fetching checkout session ID:", error);
+    return null;
+  }
 }
 

@@ -1,37 +1,45 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
+const Stripe = require("stripe");
+require("dotenv").config();
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
-app.use(cors());
+
 app.use(express.json());
+app.use(cors());
 
 app.post("/create-checkout-session", async (req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "Remove Ads",
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "jpy",
+            product_data: {
+              name: "広告の削除",
+              description: "Pay once to remove all ads",
+            },
+            unit_amount: 50000, // 金額を小数点以下2桁含む形で記述（例: 500円は50000）
           },
-          unit_amount: 500, // 5.00 USD
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url: "YOUR_EXTENSION_URL/success.html",
-    cancel_url: "YOUR_EXTENSION_URL/cancel.html",
-  });
+      ],
+      mode: "payment",
+      success_url: "https://example.com/success", // ここに成功時のURLを指定
+      cancel_url: "https://example.com/cancel", // ここにキャンセル時のURLを指定
+    });
 
-  res.json({ id: session.id });
+    res.json({ id: session.id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
