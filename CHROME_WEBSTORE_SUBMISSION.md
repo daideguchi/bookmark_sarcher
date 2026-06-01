@@ -2,6 +2,14 @@
 
 Use these values when submitting version `1.1.0` for review.
 
+## Submission status
+
+- Submitted for Chrome Web Store review on 2026-06-01 JST.
+- Dashboard status after submission: `審査待ち`.
+- Item ID: `ahnagedeobidhdhmfbnhopgjiddkfdel`.
+- Uploaded package: `dist/book-makuri-search-1.1.0.zip`.
+- Package SHA-256: `d1fa9721298283db93abc4a301fa2ec3b5cd8fe6128ec2746b0299a00c855927`.
+
 ## Single purpose
 
 Book Makuri Search helps users search bookmarks saved in their Chrome browser from a compact popup.
