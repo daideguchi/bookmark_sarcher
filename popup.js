@@ -1,33 +1,34 @@
-// Load Stripe.js dynamically
-function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = url;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
-loadScript("https://js.stripe.com/v3/").then(() => {
-  // The rest of your popup.js code
-});
-
-window.onload = function () {
+window.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const results = document.getElementById("results");
+
+  function showMessage(message) {
+    results.innerHTML = "";
+    const listItem = document.createElement("li");
+    listItem.className = "empty";
+    listItem.textContent = message;
+    results.appendChild(listItem);
+  }
 
   searchInput.addEventListener("input", function () {
     const query = searchInput.value.trim();
 
     if (!query) {
-      results.innerHTML = "";
+      showMessage("検索語を入力すると、保存済みブックマークだけを端末内で検索します。");
       return;
     }
 
     chrome.bookmarks.search({ query }, function (bookmarks) {
       results.innerHTML = "";
 
-      for (const bookmark of bookmarks) {
+      const matches = bookmarks.filter((bookmark) => bookmark.url);
+
+      if (matches.length === 0) {
+        showMessage("一致するブックマークはありません。");
+        return;
+      }
+
+      for (const bookmark of matches) {
         if (!bookmark.url) {
           continue;
         }
@@ -36,54 +37,19 @@ window.onload = function () {
         const link = document.createElement("a");
         link.href = bookmark.url;
         link.target = "_blank";
+        link.rel = "noreferrer";
 
-        // アイコンを追加
-        const favicon = document.createElement("img");
-        favicon.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
-          new URL(bookmark.url).hostname
-        )}`;
-        link.appendChild(favicon);
-
-        const title = document.createTextNode(bookmark.title);
+        const title = document.createTextNode(bookmark.title || bookmark.url);
         link.appendChild(title);
 
+        const url = document.createElement("span");
+        url.className = "url";
+        url.textContent = bookmark.url;
+
         listItem.appendChild(link);
+        listItem.appendChild(url);
         results.appendChild(listItem);
       }
     });
   });
-};
-
-// 広告削除ボタンのクリックイベント
-document
-  .getElementById("removeAdsButton")
-  .addEventListener("click", async function () {
-    chrome.runtime.sendMessage({ action: "redirectToCheckout" }, (response) => {
-      if (!response.success) {
-        console.error("Error redirecting to checkout");
-      }
-    });
-  });
-
-// サーバーからStripe CheckoutセッションIDを取得する関数
-async function fetchYourCheckoutSessionId() {
-  try {
-    const response = await fetch(
-      "http://localhost:3000/create-checkout-session",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      }
-    );
-
-    const data = await response.json();
-    return data.id; // セッションIDを返すように修正
-  } catch (error) {
-    console.error("Error fetching checkout session ID:", error);
-    return null;
-  }
-}
-
+});
